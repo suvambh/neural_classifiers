@@ -28,6 +28,9 @@ jobs:
         shell: bash -l {0}
         run: jb build mini_book/
 
+      - name: Add .nojekyll
+        run: touch mini_book/_build/html/.nojekyll
+
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
