@@ -42,7 +42,7 @@ jobs:
         shell: bash -l {0}
         run: |
           jb build mini_book/ --builder pdflatex
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: pdf
           path: mini_book/_build/latex/book.pdf
