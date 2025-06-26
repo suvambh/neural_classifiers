@@ -11,6 +11,7 @@ execute:
 
 # HTML-specific settings
 html:
+  baseurl: /neural_classifiers
   home_page_in_navbar         : false
 
 # Interact link settings
