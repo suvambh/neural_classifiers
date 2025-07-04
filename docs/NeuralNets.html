@@ -1,0 +1,777 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Fitting a function with gradient descent &#8212; Scientific Python QuickStart</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../_static/sphinx-thebe.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'docs/NeuralNets';</script>
+    <link rel="canonical" href="/neural_classifiers/docs/NeuralNets.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="🧾 LayoutLM + SROIE Tutorial (Part 1)" href="layoutlm_tutorial.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/qe-logo-large.png" class="logo__image only-light" alt="Scientific Python QuickStart - Home"/>
+    <script>document.write(`<img src="../_static/qe-logo-large.png" class="logo__image only-dark" alt="Scientific Python QuickStart - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="about_py.html">About Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Setting up Your Python Environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_by_example.html">An Introductory Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="learn_more.html">Learn More</a></li>
+<li class="toctree-l1"><a class="reference internal" href="layoutlm_tutorial.html">🧾 LayoutLM + SROIE Tutorial (Part 1)</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Fitting a function with <em>gradient descent</em></a></li>
+
+
+
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/docs/NeuralNets.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Fitting a function with gradient descent</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Fitting a function with <em>gradient descent</em></a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#automating-gradient-descent">Automating gradient descent</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#how-a-neural-network-approximates-any-given-function">How a neural network approximates any given function</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-recognise-an-owl">How to recognise an owl</a></li>
+</ul>
+
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <p><strong>Important</strong>: The interactive features of this notebook don’t work in Kaggle’s <em>Reader</em> mode. They only work in <em>Edit</em> mode. Therefore, before starting reading this, please click “<strong>Copy &amp; Edit</strong>” in the top right of this window, then in the menu click <em>Run</em> and then <em>Run all</em>. Then you’ll be able to use all the interactive sliders in this notebook.</p>
+<section id="fitting-a-function-with-gradient-descent">
+<h1>Fitting a function with <em>gradient descent</em><a class="headerlink" href="#fitting-a-function-with-gradient-descent" title="Permalink to this heading">#</a></h1>
+<p>A neural network is just a mathematical function. In the most standard kind of neural network, the function:</p>
+<ol class="arabic simple">
+<li><p>Multiplies each input by a number of values. These values are known as <em>parameters</em></p></li>
+<li><p>Adds them up for each group of values</p></li>
+<li><p>Replaces the negative numbers with zeros</p></li>
+</ol>
+<p>This represents one “layer”. Then these three steps are repeated, using the outputs of the previous layer as the inputs to the next layer. Initially, the parameters in this function are selected randomly. Therefore a newly created neural network doesn’t do anything useful at all – it’s just random!</p>
+<p>To get the function to “learn” to do something useful, we have to change the parameters to make them “better” in some way. We do this using <em>gradient descent</em>. Let’s see how this works…</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ipywidgets</span> <span class="kn">import</span> <span class="n">interact</span>
+<span class="kn">from</span> <span class="nn">fastai.basics</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;figure&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">plot_function</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="mf">2.1</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mf">2.1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="nb">min</span><span class="p">,</span><span class="nb">max</span><span class="p">,</span> <span class="mi">100</span><span class="p">)[:,</span><span class="kc">None</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">ylim</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">ylim</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">color</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ModuleNotFoundError</span><span class="g g-Whitespace">                       </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="kn">from</span> <span class="nn">ipywidgets</span> <span class="kn">import</span> <span class="n">interact</span>
+<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="kn">from</span> <span class="nn">fastai.basics</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;figure&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
+
+<span class="ne">ModuleNotFoundError</span>: No module named &#39;ipywidgets&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<p>To learn how gradient descent works, we’re going to start by fitting a quadratic, since that’s a function most of us are probably more familiar with than a neural network. Here’s the quadratic we’re going to try to fit:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="k">return</span> <span class="mi">3</span><span class="o">*</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span>
+
+<span class="n">plot_function</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;$3x^2 + 2x + 1$&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>This quadratic is of the form <span class="math notranslate nohighlight">\(ax^2+bx+c\)</span>, with parameters <span class="math notranslate nohighlight">\(a=3\)</span>, <span class="math notranslate nohighlight">\(b=2\)</span>, <span class="math notranslate nohighlight">\(c=1\)</span>. To make it easier to try out different quadratics for fitting a model to the data we’ll create, let’s create a function that calculates the value of a point on any quadratic:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">quad</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span> <span class="k">return</span> <span class="n">a</span><span class="o">*</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">b</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">c</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>If we fix some particular values of a, b, and c, then we’ll have made a quadratic. To fix values passed to a function in python, we use the <code class="docutils literal notranslate"><span class="pre">partial</span></code> function, like so:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">mk_quad</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">):</span> <span class="k">return</span> <span class="n">partial</span><span class="p">(</span><span class="n">quad</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>So for instance, we can recreate our previous quadratic:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f2</span> <span class="o">=</span> <span class="n">mk_quad</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plot_function</span><span class="p">(</span><span class="n">f2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now let’s simulate making some noisy measurements of our quadratic <code class="docutils literal notranslate"><span class="pre">f</span></code>. We’ll then use gradient descent to see if we can recreate the original function from the data.</p>
+<p>Here’s a couple of functions to add some random noise to data:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">noise</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span> <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">add_noise</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mult</span><span class="p">,</span> <span class="n">add</span><span class="p">):</span> <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">noise</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">mult</span><span class="p">))</span> <span class="o">+</span> <span class="n">noise</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">add</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s use the now to create our noisy measurements based on the quadratic above:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">20</span><span class="p">)[:,</span><span class="kc">None</span><span class="p">]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">add_noise</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Here’s the first few values of each of <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x</span><span class="p">[:</span><span class="mi">5</span><span class="p">],</span><span class="n">y</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>As you can see, they’re <em>tensors</em>. A tensor is just like an <code class="docutils literal notranslate"><span class="pre">array</span></code> in numpy (if you’re not familiar with numpy, I strongly recommend reading <a class="reference external" href="https://wesmckinney.com/book/">this great book</a>, because it’s a critical foundation for nearly all numeric programming in Python. Furthermore, PyTorch, which most researchers use for deep learning, is modeled closely on numpy.) A tensor can be a single number (a <em>scalar</em> or <em>rank-0 tensor</em>), a list of numbers (a <em>vector</em> or <em>rank-1 tensor</em>), a table of numbers (a <em>matrix</em> or <em>rank-2 tensor</em>), a table of tables of numbers (a <em>rank-3 tensor</em>), and so forth.</p>
+<p>We’re not going to learn much about our data by just looking at the raw numbers, so let’s draw a picture:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>How do we find values of a, b, and c which fit this data? One approach is to try a few values and see what fits. Here’s a function which overlays a quadratic on top of our data, along with some sliders to change a, b, and c, and see how it looks:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nd">@interact</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mf">1.1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">1.1</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mf">1.1</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">plot_quad</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">plot_function</span><span class="p">(</span><span class="n">mk_quad</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">),</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span><span class="mi">13</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p><strong>Reminder</strong>: If the sliders above aren’t working for you, that’s because the interactive features of this notebook don’t work in Kaggle’s <em>Reader</em> mode. They only work in <em>Edit</em> mode. Please click “<strong>Copy &amp; Edit</strong>” in the top right of this window, then in the menu click <em>Run</em> and then <em>Run all</em>. Then you’ll be able to use all the interactive sliders in this notebook.</p>
+<p>Try moving slider <code class="docutils literal notranslate"><span class="pre">a</span></code> a bit to the left. Does that look better or worse? How about if you move it a bit to the right? Find out which direction seems to improve the fit of the quadratic to the data, and move the slider a bit in that direction. Next, do the same for slider <code class="docutils literal notranslate"><span class="pre">b</span></code>: first figure out which direction improves the fit, then move it a bit in that direction. Then do the same for <code class="docutils literal notranslate"><span class="pre">c</span></code>.</p>
+<p>OK, now go back to slider <code class="docutils literal notranslate"><span class="pre">a</span></code> and repeat the process. Do it again for <code class="docutils literal notranslate"><span class="pre">b</span></code> and <code class="docutils literal notranslate"><span class="pre">c</span></code> as well.</p>
+<p>Did you notice that by going back and doing the sliders a second time that you were able to improve things a bit further? That’s an important insight – it’s only after changing <code class="docutils literal notranslate"><span class="pre">b</span></code> and <code class="docutils literal notranslate"><span class="pre">c</span></code>, for instance, that you realise that <code class="docutils literal notranslate"><span class="pre">a</span></code> actually needs some adjustment based on those new values.</p>
+<p>One thing that’s making this tricky is that we don’t really have a great sense of whether our fit is really better or worse. It would be easier if we had a numeric measure of that. On easy metric we could use is <em>mean absolute error</em> – which is the distance from each data point to the curve:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">mae</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">acts</span><span class="p">):</span> <span class="k">return</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">preds</span><span class="o">-</span><span class="n">acts</span><span class="p">))</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We’ll update our interactive function to print this at the top for us.</p>
+<p>Use this to repeat the approach we took before to try to find the best fit, but this time just use the value of the metric to decide which direction to move each slider, and how far to move it.</p>
+<p>This time around, try doing it in the opposite order: <code class="docutils literal notranslate"><span class="pre">c</span></code>, then <code class="docutils literal notranslate"><span class="pre">b</span></code>, then <code class="docutils literal notranslate"><span class="pre">a</span></code>.</p>
+<p>You’ll probably find that you have to go through the set of sliders a couple of times to get the best fit.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nd">@interact</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mf">1.1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">1.1</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mf">1.1</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">plot_quad</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">mk_quad</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">mae</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">plot_function</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span><span class="mi">12</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;MAE: </span><span class="si">{</span><span class="n">loss</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>In a modern neural network we’ll often have tens of millions of parameters to fit, or more, and thousands or millions of data points to fit them to. We’re not going to be able to do that by moving sliders around! We’ll need to automate this process.</p>
+<p>Thankfully, that turns out to be pretty straightforward. We can use calculus to figure out, for each parameter, whether we should increase or decrease it.</p>
+<p>Uh oh, calculus! If you haven’t touched calculus since school, you might be getting ready to run away at this point. But don’t worry, we don’t actually need much calculus at all. Just derivatives, which measure the rate of change of a function. We don’t even need to calculate them ourselves, because the computer will do it for us! If you’ve forgotten what a derivitive is, then watch the first three of these fantastic <a class="reference external" href="https://www.youtube.com/playlist?list=PLybg94GvOJ9ELZEe9s2NXTKr41Yedbw7M">videos by Professor Dave</a>. It’s only 15 minutes in total, so give it a go! Then come back here and we’ll continue on our journey…</p>
+</section>
+<section id="automating-gradient-descent">
+<h1>Automating gradient descent<a class="headerlink" href="#automating-gradient-descent" title="Permalink to this heading">#</a></h1>
+<p>The basic idea is this: if we know the <em>gradient</em> of our <code class="docutils literal notranslate"><span class="pre">mae()</span></code> function <em>with respect to</em> our parameters, <code class="docutils literal notranslate"><span class="pre">a</span></code>, <code class="docutils literal notranslate"><span class="pre">b</span></code>, and <code class="docutils literal notranslate"><span class="pre">c</span></code>, then that means we know how adjusting (for instance) <code class="docutils literal notranslate"><span class="pre">a</span></code> will change the value of <code class="docutils literal notranslate"><span class="pre">mae()</span></code>. If, say, <code class="docutils literal notranslate"><span class="pre">a</span></code> has a <em>negative</em> gradient, then we know that increasing <code class="docutils literal notranslate"><span class="pre">a</span></code> will decrease <code class="docutils literal notranslate"><span class="pre">mae()</span></code>. Then we know that’s what we need to do, since we trying to make <code class="docutils literal notranslate"><span class="pre">mae()</span></code> as low as possible.</p>
+<p>So, we find the gradient of <code class="docutils literal notranslate"><span class="pre">mae()</span></code> for each of our parameters, and then adjust our parameters a bit in the <em>opposite</em> direction to the sign of the gradient.</p>
+<p>To do this, first we need a function that takes all the parameters <code class="docutils literal notranslate"><span class="pre">a</span></code>, <code class="docutils literal notranslate"><span class="pre">b</span></code>, and <code class="docutils literal notranslate"><span class="pre">c</span></code> as a single vector input, and returns the value <code class="docutils literal notranslate"><span class="pre">mae()</span></code> based on those parameters:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">quad_mae</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">mk_quad</span><span class="p">(</span><span class="o">*</span><span class="n">params</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mae</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s try it:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">quad_mae</span><span class="p">([</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Yup, that’s the same as the starting <code class="docutils literal notranslate"><span class="pre">mae()</span></code> we had in our plot before.</p>
+<p>We’re first going to do exactly the same thing as we did manually – pick some arbritrary starting point for our parameters. We’ll put them all into a single tensor:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">abc</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.1</span><span class="p">,</span><span class="mf">1.1</span><span class="p">,</span><span class="mf">1.1</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>To tell PyTorch that we want it to calculate gradients for these parameters, we need to call <code class="docutils literal notranslate"><span class="pre">requires_grad_()</span></code>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">abc</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can now calculate <code class="docutils literal notranslate"><span class="pre">mae()</span></code>. Generally, when doing gradient descent, the thing we’re trying to minimise is called the <em>loss</em>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">loss</span> <span class="o">=</span> <span class="n">quad_mae</span><span class="p">(</span><span class="n">abc</span><span class="p">)</span>
+<span class="n">loss</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>To get PyTorch to now calculate the gradients, we need to call <code class="docutils literal notranslate"><span class="pre">backward()</span></code></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The gradients will be stored for us in an attribute called <code class="docutils literal notranslate"><span class="pre">grad</span></code>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">abc</span><span class="o">.</span><span class="n">grad</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>According to these gradients, all our parameters are a little low. So let’s increase them a bit. If we subtract the gradient, multiplied by a small number, that should improve them a bit:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">abc</span> <span class="o">-=</span> <span class="n">abc</span><span class="o">.</span><span class="n">grad</span><span class="o">*</span><span class="mf">0.01</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">quad_mae</span><span class="p">(</span><span class="n">abc</span><span class="p">)</span>
+    
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;loss=</span><span class="si">{</span><span class="n">loss</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Yes, our loss has gone down!</p>
+<p>The “small number” we multiply is called the <em>learning rate</em>, and is the most important <em>hyper-parameter</em> to set when training a neural network.</p>
+<p>BTW, you’ll see we had to wrap our calculation of the new parameters in <code class="docutils literal notranslate"><span class="pre">with</span> <span class="pre">torch.no_grad()</span></code>. That disables the calculation of gradients for any operations inside that context manager. We have to do that, because <code class="docutils literal notranslate"><span class="pre">abc</span> <span class="pre">-=</span> <span class="pre">abc.grad*0.01</span></code> isn’t actually part of our quadratic model, so we don’t want derivitives to include that calculation.</p>
+<p>We can use a loop to do a few more iterations of this:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">quad_mae</span><span class="p">(</span><span class="n">abc</span><span class="p">)</span>
+    <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span> <span class="n">abc</span> <span class="o">-=</span> <span class="n">abc</span><span class="o">.</span><span class="n">grad</span><span class="o">*</span><span class="mf">0.01</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;step=</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">; loss=</span><span class="si">{</span><span class="n">loss</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>As you can see, our loss keeps going down!</p>
+<p>If you keep running this loop for long enough however, you’ll see that the loss eventually starts increasing for a while. That’s because once the parameters get close to the correct answer, our parameter updates will jump right over the correct answer! To avoid this, we need to decrease our learning rate as we train. This is done using a <em>learning rate schedule</em>, and can be automated in most deep learning frameworks, such as fastai and PyTorch.</p>
+</section>
+<section id="how-a-neural-network-approximates-any-given-function">
+<h1>How a neural network approximates any given function<a class="headerlink" href="#how-a-neural-network-approximates-any-given-function" title="Permalink to this heading">#</a></h1>
+<p>But neural nets are much more convenient and powerful than this example showed, because we can learn much more than just a quadratic with them. How does <em>that</em> work?</p>
+<p>The trick is that a neural network is a very expressive function. In fact – it’s <a class="reference external" href="https://en.wikipedia.org/wiki/Universal_approximation_theorem">infinitely expressive</a>. A neural network can approximate any computable function, given enough parameters. A “computable function” can cover just about anything you can imagine: understand and translate human speech; paint a picture; diagnose a disease from medical imaging; write an essay; etc…</p>
+<p>The way a neural network approximates a function actually turns out to be very simple. The key trick is to combine two extremely basic steps:</p>
+<ol class="arabic simple">
+<li><p>Matrix multiplication, which is just multiplying things together and then adding them up</p></li>
+<li><p>The function <span class="math notranslate nohighlight">\(max(x,0)\)</span>, which simply replaces all negative numbers with zero.</p></li>
+</ol>
+<p>In PyTorch, the function <span class="math notranslate nohighlight">\(max(x,0)\)</span> is written as <code class="docutils literal notranslate"><span class="pre">np.clip(x,0)</span></code>. The combination of a linear function and this <em>max()</em> is called a <em>rectified linear function</em>, and it can be implemented like this:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">rectified_linear</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">m</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="n">b</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Here’s what it looks like:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_function</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">rectified_linear</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>BTW, instead of <code class="docutils literal notranslate"><span class="pre">torch.clip(y,</span> <span class="pre">0.)</span></code>, we can instead use <code class="docutils literal notranslate"><span class="pre">F.relu(x)</span></code>, which does exactly the same thing. In PyTorch, <code class="docutils literal notranslate"><span class="pre">F</span></code> refers to the <code class="docutils literal notranslate"><span class="pre">torch.nn.functional</span></code> module.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+<span class="k">def</span> <span class="nf">rectified_linear2</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">x</span><span class="p">):</span> <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">m</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="n">b</span><span class="p">)</span>
+<span class="n">plot_function</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">rectified_linear2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>To understand how this function works, try using this interactive version to play around with the parameters <code class="docutils literal notranslate"><span class="pre">m</span></code> and <code class="docutils literal notranslate"><span class="pre">b</span></code>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nd">@interact</span><span class="p">(</span><span class="n">m</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">plot_relu</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="n">plot_function</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">rectified_linear</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span><span class="n">b</span><span class="p">),</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>As you see, <code class="docutils literal notranslate"><span class="pre">m</span></code> changes the slope, and <code class="docutils literal notranslate"><span class="pre">b</span></code> changes where the “hook” appears. This function doesn’t do much on its own, but look what happens when we add two of them together:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">double_relu</span><span class="p">(</span><span class="n">m1</span><span class="p">,</span><span class="n">b1</span><span class="p">,</span><span class="n">m2</span><span class="p">,</span><span class="n">b2</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">rectified_linear</span><span class="p">(</span><span class="n">m1</span><span class="p">,</span><span class="n">b1</span><span class="p">,</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">rectified_linear</span><span class="p">(</span><span class="n">m2</span><span class="p">,</span><span class="n">b2</span><span class="p">,</span><span class="n">x</span><span class="p">)</span>
+
+<span class="nd">@interact</span><span class="p">(</span><span class="n">m1</span><span class="o">=-</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">b1</span><span class="o">=-</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">m2</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">b2</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">plot_double_relu</span><span class="p">(</span><span class="n">m1</span><span class="p">,</span> <span class="n">b1</span><span class="p">,</span> <span class="n">m2</span><span class="p">,</span> <span class="n">b2</span><span class="p">):</span>
+    <span class="n">plot_function</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">double_relu</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span><span class="n">b1</span><span class="p">,</span><span class="n">m2</span><span class="p">,</span><span class="n">b2</span><span class="p">),</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>If you play around with that for a while, you notice something quite profound: with enough of these rectified linear functions added together, you could approximate any function with a single input, to whatever accuracy you like! Any time the function doesn’t quite match, you can just add a few more additions to the mix to make it a bit closer. As an experiment, perhaps you’d like to try creating your own <code class="docutils literal notranslate"><span class="pre">plot_triple_relu</span></code> interactive function, and maybe even include the scatter plot of our data from before, to see how close you can get?</p>
+<p>This exact same approach can be expanded to functions of 2, 3, or more parameters.</p>
+</section>
+<section id="how-to-recognise-an-owl">
+<h1>How to recognise an owl<a class="headerlink" href="#how-to-recognise-an-owl" title="Permalink to this heading">#</a></h1>
+<p>OK great, we’ve created a nifty little example showing that we can drawing squiggly lines that go through some points. So what?</p>
+<p>Well… the truth is that actually drawing squiggly lines (or planes, or high-dimensional hyperplanes…) through some points is literally <em>all that deep learning does</em>! If your data points are, say, the RGB values of pixels in photos of owls, then you can create an owl-recogniser model by following the exact steps above.</p>
+<p>This may, at first, sound about as useful as the classic “how to draw an owl” guide:</p>
+<p><img alt="image.png" src="docs/attachment:c66592d3-c997-4c72-aed4-2dea579b96e1.png" /></p>
+<p>Students often ask me at this point “OK Jeremy, but how do neural nets <em>actually work</em>”. But at a foundational level, there is no “step 2”. We’re done – the above steps will, given enough time and enough data, create (for example) an owl recogniser, if you feed in enough owls (and non-owls).</p>
+<p>The devil, I guess, is in the “given enough time and enough data” part of the above sentence. There’s a <em>lot</em> of tweaks we can make to reduce both of these things. For instance, instead of running our calculations on a normal CPU, as we’ve done above, we could do thousands of them simultaneously by taking advantage of a GPU. We could greatly reduce the amount of computation and data needed by using a convolution instead of a matrix multiplication, which basically means skipping over a bunch of the multiplications and additions for bits that you’d guess won’t be important. We could make things much faster if, instead of starting with random parameters, we start with parameters of someone else’s model that does something similar to what we want (this is called <em>transfer learning</em>).</p>
+<p>And, of course, there’s lots of helpful software out there to do this stuff for you without too much fuss. Like, say, <a class="reference external" href="https://docs.fast.ai">fastai</a>.</p>
+<p>Learning these things is what we teach in our <a class="reference external" href="https://course.fast.ai">course</a>, which, like everything we make, is totally free. So if you’re interested in learning more, do check it out!</p>
+<p>As always, if you enjoyed this notebook, please upvote it to help others find it, and to encourage me to write more. If you upvote it, be careful you don’t accidentally upvote your copy that’s created when you click “Copy &amp; Edit” – you can find my original at <a class="reference external" href="https://www.kaggle.com/code/jhoward/how-does-a-neural-net-really-work">this link</a>.</p>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./docs"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="layoutlm_tutorial.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">🧾 LayoutLM + SROIE Tutorial (Part 1)</p>
+      </div>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Fitting a function with <em>gradient descent</em></a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#automating-gradient-descent">Automating gradient descent</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#how-a-neural-network-approximates-any-given-function">How a neural network approximates any given function</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-recognise-an-owl">How to recognise an owl</a></li>
+</ul>
+
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Thomas J. Sargent and John Stachurski
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2022.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
