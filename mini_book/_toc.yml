@@ -6,3 +6,4 @@ sections:
 - file: docs/python_by_example
 - file: docs/learn_more
 - file: docs/layoutlm_tutorial.md
+- file: docs/NeuralNets.ipynb
